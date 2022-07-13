@@ -185,19 +185,11 @@ def refreshToken() {
 
 def getSmartcarDevices() {
 	def vehicles = [:]
-	def body = apiGet("vehicles", null)
+	def body = apiGet("", null)
 	for (device in body.vehicles) {
-		vehicle[device.deviceid] = device.model
-		else if (device.type == "Sleep Monitor")
-			sleepMonitors[device.deviceid] = device.model
-		else if (device.type == "Activity Tracker")
-			activityTrackers[device.deviceid] = device.model ?: "Unnamed Activity Tracker"
-		else if (device.type == "Blood Pressure Monitor")
-			bloodPressure[device.deviceid] = device.model
-		else if (device.type == "Smart Connected Thermometer")
-			thermometers[device.deviceid] = device.model
+		vehicle[device.deviceid] = device.id
 	}
-	return [scales: scales, sleepMonitors: sleepMonitors, activityTrackers: activityTrackers, bloodPressure: bloodPressure, thermometers: thermometers]
+	return [vehicle: vehicles]
 }
 
 def callbackUrl(type) {
@@ -206,36 +198,19 @@ def callbackUrl(type) {
 	return "${getFullApiServerUrl()}/notification/${type}?access_token=${state.accessToken}".replace("https://", "http://")
 }
 
-def processActivity(date) {
-	def data = apiGet("v2/measure", "getactivity", [startdateymd: date, enddateymd: date, data_fields: "steps,distance,elevation,soft,moderate,intense,active,calories,totalcalories,hr_average,hr_min,hr_max,hr_zone_0,hr_zone_1,hr_zone_2,hr_zone_3"])?.activities
+def getLocation(id) {
+	def data = apiGet("location", id)
 
 	for (item in data) {
 		def dev = null
 
-		if (item.deviceid != null)
-			dev = getChildDevice(buildDNI(item.deviceid))
-		else if (item.is_tracker)
-			dev = getChildByCapability("StepSensor")
+		if (item.latitidue != null) dev = getChildDevice(buildDNI(item.deviceid))
 
 		if (!dev)
 			continue
 
-		dev.sendEvent(name: "steps", value: item.steps, isStateChange: true)
-		dev.sendEvent(name: "distance", value: item.distance, isStateChange: true)
-		dev.sendEvent(name: "elevation", value: item.elevation, isStateChange: true)
-		dev.sendEvent(name: "soft", value: item.soft, isStateChange: true)
-		dev.sendEvent(name: "moderate", value: item.moderate, isStateChange: true)
-		dev.sendEvent(name: "intense", value: item.intense, isStateChange: true)
-		dev.sendEvent(name: "active", value: item.active, isStateChange: true)
-		dev.sendEvent(name: "calories", value: item.calories, isStateChange: true)
-		dev.sendEvent(name: "totalCalories", value: item.totalcalories, isStateChange: true)
-		dev.sendEvent(name: "heartRateAverage", value: item.hr_average, isStateChange: true)
-		dev.sendEvent(name: "heartRateMin", value: item.hr_min, isStateChange: true)
-		dev.sendEvent(name: "heartRateMax", value: item.hr_max, isStateChange: true)
-		dev.sendEvent(name: "heartRateZone0", value: item.hr_zone_0, isStateChange: true)
-		dev.sendEvent(name: "heartRateZone1", value: item.hr_zone_1, isStateChange: true)
-		dev.sendEvent(name: "heartRateZone2", value: item.hr_zone_2, isStateChange: true)
-		dev.sendEvent(name: "heartRateZone3", value: item.hr_zone_3, isStateChange: true)
+		dev.sendEvent(name: "Latitude", value: item.latitude, isStateChange: true)
+		dev.sendEvent(name: "Longitude", value: item.longitude, isStateChange: true)
 	}
 }
 
@@ -260,6 +235,7 @@ def getChildByCapability(capability) {
 	}
 	return null
 }
+
 // API call methods
 
 def apiGet(endpoint, id) {
@@ -355,21 +331,9 @@ private removeChildDevices(devices) {
 }
 
 def refreshDevices() {
-	def body = apiGet("v2/user", "getdevice")
-	for (device in body?.devices) {
+	def body = apiGet("", null)
+	for (device in body?.vehicles) {
 		def dev = getChildDevice(buildDNI(device.deviceid))
-		if (dev != null) {
-			if (device.type != "Sleep Monitor") {
-				def intBattery = 30
-				if (device.battery == "high")
-					intBattery = 80
-				else if (device.battery == "medium")
-					intBattery = 50
-				else if (device.battery == "low")
-					intBattery = 20
-				dev.sendEvent(name: "battery", value: intBattery)
-			}
-		}
 	}
 }
 
