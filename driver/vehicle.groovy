@@ -29,5 +29,18 @@ metadata {
     attribute "Tire Pressure RF", "number"
     attribute "Tire Pressure LR", "number"
     attribute "Tire Pressure RR", "number"
+    
+    command "getLocation"
     }
+}
+
+def lock() {
+  app = getParent()
+  app.action("lock")
+}
+
+def getLocation() {
+  app = getParent()
+  id = device.id
+  app.getLocation(id)
 }
