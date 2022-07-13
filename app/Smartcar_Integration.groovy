@@ -8,13 +8,14 @@
 import groovy.transform.Field
 
 definition(
-    name: "Smartcar Integration",
-
-    author: "Jonathan Fields",
-    description: "Integrate Smartcar into Hubitat.",
-    category: "My Apps",
-    iconUrl: "https://smartcar.com/static/3a27faa94cb586130bfa2c033f863ae2/05c1b/black_logo.webp"
-	documentationLink: "https://github.com/fieldsjm/hubitat-Smartcar/blob/master/README.md")
+	name: "Smartcar Integration",
+	author: "Jonathan Fields",
+	description: "Integrate Smartcar into Hubitat.",
+	category: "My Apps",
+	iconUrl: "https://raw.githubusercontent.com/fieldsjm/Hubitat-Smartcar/main/resources/smartcar_logo.png",
+	iconX2Url: "https://raw.githubusercontent.com/fieldsjm/Hubitat-Smartcar/main/resources/smartcar_logo@2x.png",
+	iconX3Url: "https://raw.githubusercontent.com/fieldsjm/Hubitat-Smartcar/main/resources/smartcar_logo@3x.png",
+	documentationLink: "https://github.com/fieldsjm/Hubitat-Smartcar/blob/main/README.md")
 
 preferences {
      page(name: "mainPage", title: "", install: true, uninstall: true)
@@ -51,7 +52,7 @@ def mainPage() {
  			}
 	    if(state.appInstalled == 'COMPLETE'){
 		    section("Smartcar Vechicles") {
-				app(name: "smartcarVehicles", appName: "Smartcar Vehicles", title: "Add a new Smartcar Vehicle", multiple: true)
+				app(name: "Smartcar_Vehicles", appName: "Smartcar Vehicles", title: "Add a new Smartcar Vehicle", multiple: true)
 			}
 	}
 }
