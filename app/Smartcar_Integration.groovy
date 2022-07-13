@@ -32,6 +32,7 @@ def updated() {
 def mainPage() {
     dynamicPage(name: "mainPage") {
     	isInstalled()
+	     def defaultMeasurementSystem = 2
 	section("API Access"){
                 paragraph "To connect to the Smartcar API you will need to obtain Client Id and Client Secret from Smartcar."
                 paragraph "Check the box below to view instructions on how to obtain API access."
@@ -45,13 +46,14 @@ def mainPage() {
                 }
 			}
 			section("General") {
-                input "clientID", "text", title: "API Client ID", required: true
-			    input "clientSecret", "text", title: "API Client Secret", required: true
-			    input "debugOutput", "bool", title: "Enable debug logging?", defaultValue: true
-       			label title: "Enter a name for parent app (optional)", required: false
- 			}
+				input "clientID", "text", title: "API Client ID", required: true
+				input "clientSecret", "text", title: "API Client Secret", required: true
+				input "measurementSystem", "enum", title: "Measurement System", options: [1: "Imperial", 2: "Metric"], required: true, defaultValue: defaultMeasurementSystem
+				input "debugOutput", "bool", title: "Enable debug logging?", defaultValue: true
+				label title: "Enter a name for parent app (optional)", required: false
+			}
 	    if(state.appInstalled == 'COMPLETE'){
-		    section("Smartcar Vechicles") {
+		    section("Smartcar Vehicles") {
 				app(name: "Smartcar_Vehicles", appName: "Smartcar Vehicles", title: "Add a new Smartcar Vehicle", multiple: true)
 			}
 	}
