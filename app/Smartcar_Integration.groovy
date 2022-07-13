@@ -72,7 +72,11 @@ def isInstalled() {
 def getOAuthDetails() {
     return [clientID: clientID, clientSecret: clientSecret]
 }
-
+	
+def getMeasurementSystem() {
+    return measurementSystem.toInteger()
+}
+	
 def getDebugLogging() {
     return debugOutput ?: false
 }
