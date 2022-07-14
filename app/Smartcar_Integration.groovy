@@ -10,6 +10,7 @@ import groovy.transform.Field
 definition(
 	name: "Smartcar Integration",
 	author: "Jonathan Fields",
+    namespace: "fieldsjm.smartcar",
 	description: "Integrate Smartcar into Hubitat.",
 	category: "My Apps",
 	iconUrl: "https://raw.githubusercontent.com/fieldsjm/Hubitat-Smartcar/main/resources/smartcar_logo.png",
@@ -18,7 +19,7 @@ definition(
 	documentationLink: "https://github.com/fieldsjm/Hubitat-Smartcar/blob/main/README.md")
 
 preferences {
-     page(name: "mainPage", title: "", install: true, uninstall: true)
+    page(name: "mainPage", title: "", install: true, uninstall: true)
 	page(name: "prefOAuth")
 	page(name: "prefDevices")
 } 
@@ -33,59 +34,56 @@ def updated() {
 
 def mainPage() {
     dynamicPage(name: "mainPage") {
-    	isInstalled()
-	     def defaultMeasurementSystem = 2
-	section("API Access"){
-                paragraph "To connect to the Smartcar API you will need to obtain Client Id and Client Secret from Smartcar."
-                paragraph "Check the box below to view instructions on how to obtain API access."
-				input "showInstructions", "bool", title: "Show API Instructions", submitOnChange: true
-
-                if (showInstructions) {
-                    paragraph """<ul><li>Go to <a href="https://dashboard.smartcar.com/signup" target="_blank">https://dashboard.smartcar.com/signup</a></li>
-                    <li>Enter Name, Contact Email, and creat a password</li>
-		    <li>Copy both the <b>Client Id</b> and <b>Client Secret</b> into the boxes below</li>
-                    <li>Enter <b>https://cloud.hubitat.com/oauth/stateredirect</b> for the Callback URL</li></ul>"""
-                }
-			}
-			section("General") {
-				input "clientID", "text", title: "API Client ID", required: true
-				input "clientSecret", "text", title: "API Client Secret", required: true
-				input "measurementSystem", "enum", title: "Measurement System", options: [1: "imperial", 2: "metric"], required: true, defaultValue: defaultMeasurementSystem
-				input "debugOutput", "bool", title: "Enable debug logging?", defaultValue: true
-				label title: "Enter a name for parent app (optional)", required: false
-			}
-	    if(state.appInstalled != 'COMPLETE'){
-		    section
-		    {
-			    paragraph "Please click <b>Done</b> to install the parent app. Afterwards reopen the app to add your Smartcar Vechicles."
-		    } else {
-			    prefOAuth()
-		    }
-	    }
+        isInstalled()
+        def defaultMeasurementSystem = 2
+        section("API Access"){
+            paragraph "To connect to the Smartcar API you will need to obtain Client Id and Client Secret from Smartcar."
+            paragraph "Check the box below to view instructions on how to obtain API access."
+            input "showInstructions", "bool", title: "Show API Instructions", submitOnChange: true
+            
+            if (showInstructions) {
+                paragraph "<ul><li>Go to <a href='https://dashboard.smartcar.com/signup' target='_blank'>https://dashboard.smartcar.com/signup</a></li><li>Enter Name, Contact Email, and creat a password</li><li>Copy both the <b>Client Id</b> and <b>Client Secret</b> into the boxes below</li><li>Enter <b>https://cloud.hubitat.com/oauth/stateredirect</b> for the Callback URL</li></ul>"
+                    }
+        }
+        section("General") {
+            input "clientID", "text", title: "API Client ID", required: true
+            input "clientSecret", "text", title: "API Client Secret", required: true
+            input "measurementSystem", "enum", title: "Measurement System", options: [1: "imperial", 2: "metric"], required: true, defaultValue: defaultMeasurementSystem
+            input "debugOutput", "bool", title: "Enable debug logging?", defaultValue: true
+            label title: "Enter a name for parent app (optional)", required: false
+        }
+        if(state.appInstalled != 'COMPLETE'){
+            section {
+                paragraph "Please click <b>Done</b> to install the parent app. Afterwards reopen the app to add your Smartcar Vechicles."
+            }
+        } else {
+            prefOAuth()
+        }
+    }
 }
 
 def prefOAuth() {
-	return dynamicPage(name: "prefOAuth", title: "Smartcar OAuth", nextPage: "prefDevices", uninstall:false, install: false) {
-		section {
-			def desc = ""
-			if (!state.authToken) {
-				showHideNextButton(false)
-				desc = "To continue you will need to connect your Smartcar and Hubitat accounts"
-			} else {
-				showHideNextButton(true)
-				desc = "Your Hubitat and Smartcar accounts are connected"
-			}
-			href url: oauthInitialize(), style: "external", required: true, title: "Smartcar Account Authorization", description: desc
-		}
-	}
+    return dynamicPage(name: "prefOAuth", title: "Smartcar OAuth", nextPage: "prefDevices", uninstall:false, install: false) {
+        section {
+            def desc = ""
+            if (!state.authToken) {
+                showHideNextButton(false)
+                desc = "To continue you will need to connect your Smartcar and Hubitat accounts"
+            } else {
+                showHideNextButton(true)
+                desc = "Your Hubitat and Smartcar accounts are connected"
+            }
+            href url: oauthInitialize(), style: "external", required: true, title: "Smartcar Account Authorization", description: desc
+        }
+    }
 }
 	
 def prefDevices() {
 	state.devices = getSmartcars() 
 	return dynamicPage(name: "prefDevices", title: "Smartcar Vehicles", uninstall:true, install: true) {
-		section {
-			if (state.devices?.vehicles?.size() > 0) input "vehicles", "enum", title: "Vehicles", options: state.devices.vehicles, multiple: true
-		}
+        section {
+            if (state.devices?.vehicles?.size() > 0) input "vehicles", "enum", title: "Vehicles", options: state.devices.vehicles, multiple: true
+        }
 	}
 }
 	
@@ -124,14 +122,14 @@ def oauthCallback() {
 		catch (e) {
             log.error "OAuth error: ${e}"
         }
-	} 
-	else {
-		log.error "OAuth state does not match, possible spoofing?"
-	}
-	if (state.authToken) 
-		oauthSuccess()
-	else
-		oauthFailure()
+	} else {
+        log.error "OAuth state does not match, possible spoofing?"
+    }
+    if (state.authToken) {
+        oauthSuccess()
+    } else {
+        oauthFailure()
+    }
 }
 
 def oauthSuccess() {
@@ -167,19 +165,17 @@ def refreshToken() {
                 state.authToken = resp.data.body.access_token
                 state.authTokenExpires = now() + (resp.data.body.expires_in * 1000) - 60000
 				result = true
-			}
-			else {
-				state.authToken = null
-				result = false
+			} else {
+                state.authToken = null
+                result = false
 			}
 		}
-	}
-	catch (e) {
+	} catch (e) {
 		log.error "Failed to refresh token: ${e}"
 		state.authToken = null
 		result = false
-	}
-	return result
+    }
+    return result
 }
 	
 def getSmartcars() {
@@ -188,13 +184,13 @@ def getSmartcars() {
 }
 
 def apiGetVehicles() {
-	if (state.authTokenExpires <= now()) {
-		if (!refreshToken())
-			return null
-	}
-	def result = null
-	try {
-		def params = [
+    if (state.authTokenExpires <= now()) {
+        if (!refreshToken())
+        return null
+    }
+    def result = null
+    try {
+        def params = [
 			uri: "https://api.smartcar.com",
 			path: "/v2.0/vehicles",
 			contentType: "application/json",
@@ -205,18 +201,17 @@ def apiGetVehicles() {
 		if (query != null)
 			params.query << query
 		httpGet(params) { resp ->
-			if (resp.data.status == 0)
-				result = resp.data.body
-			else if (resp.data.status == 401) {
-				refreshToken()
-			}
+            if (resp.data.status == 0) {
+                result = resp.data.body
+            } else if (resp.data.status == 401) {
+                refreshToken()
+            }
 		}
-	}
-	catch (e) {
-		log.error "Error getting API data for vehicles: ${e}"
-		result = null
-	}
-	return result
+	} catch (e) {
+        log.error "Error getting API data for vehicles: ${e}"
+        result = null
+    }
+    return result
 }
 	
 def isInstalled() {
