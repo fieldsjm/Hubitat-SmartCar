@@ -88,8 +88,7 @@ def prefDevices() {
 }
 	
 def oauthInitialize() {
-	if (state.accessToken == null)
-	createAccessToken()
+	if (state.accessToken == null) createAccessToken()
 
 	state.oauthState = "${getHubUID()}/apps/${app.id}/callback?access_token=${state.accessToken}"
 		
