@@ -6,7 +6,7 @@
  */
 
 metadata {
-  definition(name: "Smartcar Vehicle") {
+  definition(name: "Smartcar Vehicle", namespace: "jmf.smartcar") {
     capability "Lock"
     
     attribute "Oil Life %", "number"
